@@ -176,14 +176,15 @@
         }
         .helper-text { font-size: 0.75rem; color: var(--text-secondary); margin-top: 6px; }
 
-        /* --- BUTTON STYLE UPDATED --- */
-        .btn-wa {
+        /* --- BUTTON STYLE UPDATED FOR EMAIL --- */
+        .btn-email {
             display: flex;
             align-items: center;
             justify-content: center;
             width: 100%;
             padding: 16px;
-            background: linear-gradient(90deg, #11998e, #38ef7d);
+            /* Gradient Merah ke Orange untuk kesan Gmail/Email modern */
+            background: linear-gradient(90deg, #dd3e54, #ff6a00);
             color: white;
             border: none;
             border-radius: 12px;
@@ -192,15 +193,15 @@
             cursor: pointer;
             text-decoration: none;
             gap: 10px;
-            box-shadow: 0 5px 20px rgba(56, 239, 125, 0.3);
+            box-shadow: 0 5px 20px rgba(221, 62, 84, 0.4);
             transition: transform 0.2s, background 0.3s;
             text-transform: uppercase;
         }
-        .btn-wa:active { transform: scale(0.98); }
-        .btn-wa svg { width: 22px; height: 22px; fill: white; }
+        .btn-email:active { transform: scale(0.98); }
+        .btn-email svg { width: 22px; height: 22px; fill: white; }
 
         /* Style untuk tombol disabled */
-        .btn-wa:disabled {
+        .btn-email:disabled {
             background: #555 !important;
             cursor: not-allowed;
             box-shadow: none;
@@ -258,7 +259,7 @@
                     <li>Scan QRIS di atas dengan aplikasi E-Wallet/Bank negara Anda.</li>
                     <li>Pastikan nama merchant sesuai.</li>
                     <li>Screenshot bukti sukses bayar.</li>
-                    <li>Isi <b>LID</b> & kirim ke Admin.</li>
+                    <li>Isi <b>LID</b> & kirim ke Email Admin.</li>
                 </ol>
             </div>
         </div>
@@ -269,15 +270,16 @@
             <p class="helper-text">Ketik <b>cekst</b> di bot untuk lihat LID.</p>
         </div>
 
-        <button id="btnKirim" class="btn-wa" onclick="kirimBuktiWhatsApp()" disabled>
-            <svg viewBox="0 0 24 24"><path d="M17.472 14.382C17.117 14.205 15.378 13.344 15.053 13.232C14.73 13.12 14.493 13.064 14.257 13.418C14.02 13.771 13.343 14.565 13.136 14.801C12.929 15.036 12.723 15.065 12.368 14.887C12.014 14.71 10.873 14.336 9.52003 13.129C8.45503 12.18 7.73703 11.007 7.53003 10.653C7.32303 10.298 7.50803 10.106 7.68603 9.93002C7.84603 9.77102 8.04103 9.51702 8.21903 9.31002C8.39603 9.10302 8.45603 8.95502 8.57403 8.71902C8.69203 8.48302 8.63303 8.27702 8.54403 8.09902C8.45603 7.92102 7.74703 6.17802 7.45203 5.47102C7.16403 4.78202 6.87303 4.87602 6.65703 4.87602C6.45503 4.87602 6.22003 4.87102 5.98403 4.87102C5.74803 4.87102 5.36503 4.96002 5.04003 5.31402C4.71503 5.66802 3.80103 6.52402 3.80103 8.26402C3.80103 10.005 5.06803 11.687 5.24603 11.922C5.42303 12.158 7.74703 15.742 11.417 17.327C14.155 18.508 14.686 18.291 15.276 18.232C15.867 18.173 17.165 17.485 17.432 16.719C17.697 15.952 17.697 15.293 17.638 15.185C17.579 15.077 17.343 15.018 16.989 14.841H17.472V14.382Z"/></svg>
-            Kirim Bukti Pembayaran
+        <button id="btnKirim" class="btn-email" onclick="kirimBuktiEmail()" disabled>
+            <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+            Kirim Bukti ke Email
         </button>
-        <p class="note-footer">Anda akan diarahkan ke WhatsApp untuk mengirim foto bukti.</p>
+        <p class="note-footer">Aplikasi Email akan terbuka. Jangan lupa <b>Lampirkan Foto (Attach)</b> secara manual.</p>
     </div>
 
     <script>
-        const NOMOR_ADMIN = '6285758412480'; 
+        // --- KONFIGURASI EMAIL ---
+        const EMAIL_ADMIN = 'Owalasoft@gmail.com'; 
         const BASE_PAYLOAD = "00020101021226570011ID.DANA.WWW011893600915051415649802095141564980303UMI51440014ID.CO.QRIS.WWW0215ID10232926833570303UMI520473725303360540430005802ID5907Eg_shop6015Kab. Tulang Baw610534683621960150011ID.DANA.WWW63042C8F";
 
         const PAKET = {
@@ -336,12 +338,10 @@
                 viewError.style.display = 'none';
                 viewPayment.style.display = 'block';
                 
-                // Reset State
                 document.getElementById('countrySelect').selectedIndex = 0;
                 document.getElementById('qris-area').classList.remove('show');
                 document.getElementById('qris-area').style.display = 'none';
                 
-                // --- RESET TOMBOL JADI DISABLED ---
                 btnKirim.disabled = true;
 
                 document.getElementById('display-packet').innerText = `Paket: ${currentPacketName}`;
@@ -358,12 +358,10 @@
             const btnKirim = document.getElementById('btnKirim');
             
             if (!countryCode) {
-                // Jika user entah bagaimana memilih default option lagi
                 btnKirim.disabled = true;
                 return;
             }
 
-            // --- AKTIFKAN TOMBOL ---
             btnKirim.disabled = false;
 
             const rateData = EXCHANGE_RATES[countryCode];
@@ -398,8 +396,8 @@
             }, 50);
         }
 
-        function kirimBuktiWhatsApp() {
-            // Safety check: Jangan kirim kalau tombol harusnya disabled
+        // --- FUNGSI BARU: KIRIM VIA EMAIL ---
+        function kirimBuktiEmail() {
             const btnKirim = document.getElementById('btnKirim');
             if (btnKirim.disabled) return;
 
@@ -423,19 +421,32 @@
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
             const waktu = now.toLocaleDateString('id-ID', options);
 
-            const pesan = 
-`*KONFIRMASI PEMBAYARAN*
+            // Format Subjek Email
+            const subject = `KONFIRMASI PEMBAYARAN - ${lidInput}`;
 
-🆔 *LID:* ${lidInput}
-🌍 *Negara:* ${countryName}
-📅 *Waktu:* ${waktu}
-💰 *Nominal IDR:* Rp ${currentAmountIDR.toLocaleString('id-ID')}
-📦 *Paket:* ${currentPacketName}
+            // Format Isi Email
+            const body = 
+`Halo Admin Owalasoft,
 
-Mohon segera diproses, bukti pembayaran terlampir.`;
+Saya ingin konfirmasi pembayaran paket limit.
+Mohon dicek bukti transfer yang saya lampirkan (Attachment).
 
-            const urlWA = `https://wa.me/${NOMOR_ADMIN}?text=${encodeURIComponent(pesan)}`;
-            window.open(urlWA, '_blank');
+---------------------------
+🆔 LID: ${lidInput}
+🌍 Negara: ${countryName}
+📅 Waktu: ${waktu}
+💰 Nominal: Rp ${currentAmountIDR.toLocaleString('id-ID')}
+📦 Paket: ${currentPacketName}
+---------------------------
+
+Terima kasih.`;
+
+            // Membuat Link Mailto
+            // encodeURIComponent penting agar spasi dan enter terbaca di email
+            const mailtoLink = `mailto:${EMAIL_ADMIN}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            
+            // Membuka aplikasi email
+            window.location.href = mailtoLink;
         }
 
         function crc16ccitt(str) {
